@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: personal-android-apk
@@ -46,6 +46,18 @@ jobs:
 
       - name: Build universal APK with bundled Cronet
         run: flutter build apk --release --dart-define=cronetHttpNoPlay=true --obfuscate --split-debug-info=build/symbols -t lib/next/main.dart
+
+      - name: Publish personal prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create personal-v1.3.0+40
+          build/app/outputs/flutter-apk/app-release.apk
+          --repo "$GITHUB_REPOSITORY"
+          --target "$GITHUB_SHA"
+          --title "Ark Novel 1.3.0+40 (个人构建)"
+          --notes "个人维护构建；基于上游 ark_novel-v1.3.0（1.3.0+40）。包含 arm64、armeabi-v7a、x86_64，使用内置 Cronet。"
+          --prerelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
